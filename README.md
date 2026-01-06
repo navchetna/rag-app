@@ -34,7 +34,7 @@ This backend acts as a unified gateway for multiple microservices:
 
 ### 🔍 Intelligent Retrieval
 - Vector similarity search using Qdrant
-- MiniLM-L6-v2 embeddings for semantic understanding
+- MPN‌et-base-v2 embeddings (768-dimensional) for semantic understanding
 - Context-aware document retrieval
 - Configurable similarity thresholds
 
@@ -71,7 +71,8 @@ This backend acts as a unified gateway for multiple microservices:
 ### 1. Clone and Setup
 
 ```bash
-cd /home/alimohammad/rag-backend
+git clone <your-repo-url> rag-backend
+cd rag-backend
 python setup.py setup
 ```
 
@@ -125,8 +126,8 @@ Parameters:
 
 Response:
 {
-  "batch_job_id": "ALI-1767681208.8422334",
-  "batch_job_file_ids": ["ALI-1767681208.8422334:pdf1.pdf"],
+  "batch_job_id": "batch_123456789.1234567890",
+  "batch_job_file_ids": ["batch_123456789.1234567890:document.pdf"],
   "message": "Successfully submitted 1 file(s) for processing",
   "status": "queued"
 }
@@ -136,25 +137,25 @@ Response:
 ```bash
 curl -X POST \
   -F "files=@document.pdf" \
-  -F "user_id=user123" \
+  -F "user_id=default" \
   http://localhost:8080/ingest
 ```
 
 ### Check Ingestion Status
 ```bash
-GET /status?batch_job_id=ALI-1767681208.8422334
+GET /status?batch_job_id=batch_123456789.1234567890
 # OR
-GET /status?batch_job_file_id=ALI-1767681208.8422334:pdf1.pdf
+GET /status?batch_job_file_id=batch_123456789.1234567890:document.pdf
 
 Response:
 {
-  "batch_job_id": "ALI-1767681208.8422334",
-  "user_id": "user123",
+  "batch_job_id": "batch_123456789.1234567890",
+  "user_id": "default",
   "status": "completed",  // queued, processing, completed, failed
   "total_files": 1,
   "files": [
     {
-      "batch_job_file_id": "ALI-1767681208.8422334:pdf1.pdf",
+      "batch_job_file_id": "batch_123456789.1234567890:document.pdf",
       "filename": "document.pdf",
       "status": "completed",
       "parsing_status": "completed",
@@ -172,7 +173,7 @@ Response:
 
 **Example:**
 ```bash
-curl "http://localhost:8080/status?batch_job_id=ALI-1767681208.8422334"
+curl "http://localhost:8080/status?batch_job_id=batch_123456789.1234567890"
 ```
 
 ### Query the RAG System
@@ -181,18 +182,18 @@ POST /query
 Content-Type: application/json
 
 {
-  "query": "What was the budget for 2024?",
-  "user_id": "user123",
+  "query": "What is the main topic covered in the documents?",
+  "user_id": "default",
   "use_context": true
 }
 
 Response:
 {
-  "query": "What was the budget for 2024?",
-  "response": "Based on the provided documents...",
+  "query": "What is the main topic covered in the documents?",
+  "response": "Based on the provided documents, the main topics include...",
   "used_rag": true,
-  "context": "[Document 1] Budget information...",
-  "created_at": "2026-01-06T10:40:00"
+  "context": "[Document 1 - document.pdf]\nThe document discusses...",
+  "created_at": "2026-01-06T10:40:00Z"
 }
 ```
 
@@ -201,8 +202,8 @@ Response:
 curl -X POST \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "What was the budget for 2024?",
-    "user_id": "user123",
+    "query": "What is the main topic?",
+    "user_id": "default",
     "use_context": true
   }' \
   http://localhost:8080/query
