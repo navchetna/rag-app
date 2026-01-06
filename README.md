@@ -1,4 +1,4 @@
-# RAG Backend - Production-Ready FastAPI Application
+# RAG App built On Navchetna/AIComps Microservices
 
 A comprehensive backend service for Retrieval Augmented Generation (RAG) systems that orchestrates document ingestion, vector database operations, and LLM-powered query answering.
 
