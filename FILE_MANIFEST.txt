@@ -1,0 +1,158 @@
+RAG BACKEND - FILE MANIFEST
+============================
+
+Generated: January 6, 2026
+Project: RAG Backend Application (Production-Ready FastAPI)
+
+CORE APPLICATION FILES
+======================
+main.py                    - FastAPI application entry point with lifespan management
+config.py                  - Environment-based configuration management
+setup.py                   - Setup utilities and server launcher script
+requirements.txt           - Python package dependencies
+
+CONFIGURATION FILES
+===================
+.env.example              - Environment variables template (copy to .env)
+.gitignore               - Git ignore patterns
+docker-compose.yml       - Docker Compose orchestration file
+Dockerfile              - Docker image definition
+
+DOCUMENTATION
+==============
+README.md                 - Main project documentation with architecture
+GETTING_STARTED.md       - Step-by-step setup guide with troubleshooting
+USAGE_EXAMPLES.md        - Practical API usage examples (curl, Python)
+DOCKER.md                - Docker deployment guide
+PROJECT_SUMMARY.md       - Project overview and summary
+FILE_MANIFEST.txt        - This file
+
+UTILITIES
+=========
+quick-start.sh           - Quick start script for setup
+
+APPLICATION PACKAGE (app/)
+=========================
+
+CORE MODULES:
+  database.py            - SQLAlchemy session management and DB initialization
+  models.py              - ORM models (IngestionJob, IngestionFile, Conversation)
+  schemas.py             - Pydantic request/response validation schemas
+
+SERVICES (app/services/):
+  llm_service.py         - Groq LLM integration with RAG context
+  embedding_service.py   - MiniLM text embedding generation
+  pdf_parser_service.py  - PDF Parser microservice client
+  dataprep_service.py    - DataPrep microservice client
+  retriever_service.py   - Qdrant vector retrieval client
+
+ROUTES (app/routes/):
+  ingest.py              - POST /ingest endpoint for document uploads
+  status.py              - GET /status endpoint for tracking ingestion
+  query.py               - POST /query endpoint for RAG queries
+
+BACKGROUND TASKS:
+  background_tasks.py    - Async ingestion pipeline (parsing → dataprep)
+
+PACKAGE INITIALIZATION:
+  __init__.py (app/)     - Package marker
+  __init__.py (services/)- Package marker
+  __init__.py (routes/)  - Package marker
+
+DATABASE
+========
+rag_backend.db           - SQLite database (auto-created on first run)
+  Tables:
+    - ingestion_jobs     (batch job tracking)
+    - ingestion_files    (per-file tracking)
+    - conversations      (chat history)
+
+ARCHITECTURE
+============
+Services:
+  - PDF Parser (localhost:8000) - Parses PDF documents
+  - DataPrep (localhost:5000)   - Vectorizes and stores in Qdrant
+  - Retriever (localhost:7000)  - Performs semantic search
+  - Qdrant (localhost:6333)     - Vector database
+  - Groq API                    - LLM for question answering
+
+Endpoints:
+  - GET  /health        - Server health check
+  - GET  /              - API information
+  - POST /ingest        - Upload documents
+  - GET  /status        - Check ingestion status
+  - POST /query         - Query with RAG
+  - GET  /docs          - Interactive API documentation
+
+KEY FEATURES
+============
+✓ Production-ready FastAPI application
+✓ Modular service architecture
+✓ Asynchronous document ingestion
+✓ Multi-file batch processing
+✓ Real-time status tracking
+✓ Vector similarity search (Qdrant)
+✓ LLM-powered query answering
+✓ Conversation memory
+✓ RAG flag indicating context usage
+✓ Comprehensive error handling
+✓ Environment-based configuration
+✓ Docker support
+✓ SQLite persistence
+✓ Full API documentation
+✓ Security features (CORS, input validation)
+
+TECHNOLOGY STACK
+================
+- FastAPI (web framework)
+- Uvicorn (ASGI server)
+- SQLAlchemy (ORM)
+- Pydantic (validation)
+- httpx (async HTTP)
+- sentence-transformers (embeddings)
+- groq (LLM API)
+- Docker & Docker Compose
+
+HOW TO USE
+==========
+1. python setup.py setup      # Install dependencies
+2. nano .env                  # Configure (add GROQ_API_KEY)
+3. python setup.py run --debug # Start server
+
+4. Visit http://localhost:8080/docs for interactive API
+5. See USAGE_EXAMPLES.md for code examples
+6. See GETTING_STARTED.md for detailed setup
+
+QUICK COMMANDS
+==============
+Setup:              python setup.py setup
+Run (debug):        python setup.py run --debug
+Run (production):   python setup.py run
+Docker:             docker-compose up -d
+Check health:       curl http://localhost:8080/health
+View docs:          http://localhost:8080/docs
+Upload PDF:         curl -F "files=@doc.pdf" http://localhost:8080/ingest
+Check status:       curl "http://localhost:8080/status?batch_job_id=..."
+Query:              curl -X POST -H "Content-Type: application/json" -d '{"query":"..."}' http://localhost:8080/query
+
+TOTAL FILES CREATED
+===================
+Core Python modules:      7
+Route handlers:          3
+Service modules:         5
+Configuration files:     4
+Documentation:           5
+Docker files:            2
+Utilities:               2
+Manifest:                1
+========================
+Total:                  29 files
+
+STATUS: ✅ PROJECT COMPLETE AND READY FOR USE
+
+All microservice integrations implemented.
+All endpoints functional.
+Full documentation provided.
+Production-ready code quality.
+
+Start with: python setup.py setup
