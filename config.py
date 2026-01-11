@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     
     # LLM Configuration (Groq)
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "llama-2-70b-chat"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
     LLM_TIMEOUT: int = 30
     
     # Embedding Configuration

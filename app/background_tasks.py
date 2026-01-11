@@ -8,6 +8,7 @@ from app.models import IngestionFile, IngestionStatus
 from app.services.pdf_parser_service import pdf_parser_service
 from app.services.dataprep_service import dataprep_service
 from app.database import SessionLocal
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -28,28 +29,43 @@ async def process_ingestion_pipeline(
         batch_job_file_ids: List of file IDs from PDF parser response
         file_mapping: Mapping of file IDs to file information
     """
+    pipeline_start_time = datetime.utcnow()
+    logger.info(f"[Pipeline] Starting batch {batch_job_id} with {len(batch_job_file_ids)} files")
+    
+    completed_files = 0
+    failed_files = 0
+    
     try:
-        logger.info(f"Starting ingestion pipeline for batch {batch_job_id}")
-        
         # Process each file
-        for file_id in batch_job_file_ids:
+        for idx, file_id in enumerate(batch_job_file_ids, 1):
             if file_id not in file_mapping:
-                logger.warning(f"File ID {file_id} not in mapping")
+                logger.warning(f"[Pipeline] File ID {file_id} not found in mapping")
+                failed_files += 1
                 continue
             
             filename, user_id = file_mapping[file_id]
+            file_start_time = datetime.utcnow()
+            
+            logger.info(f"[Pipeline] Processing file {idx}/{len(batch_job_file_ids)}: {filename}")
             
             try:
                 # Step 1: Wait for PDF parsing to complete
-                logger.info(f"Monitoring parsing status for {filename}")
+                logger.info(f"[Pipeline] Step 1: Monitoring PDF parsing for {filename}")
                 await _monitor_parsing_status(file_id, batch_job_id, filename, user_id)
                 
                 # Step 2: Get parser output and call DataPrep
-                logger.info(f"Calling DataPrep for {filename}")
+                logger.info(f"[Pipeline] Step 2: Calling DataPrep for {filename}")
                 await _call_dataprep(file_id, batch_job_id, filename, user_id)
                 
+                elapsed = (datetime.utcnow() - file_start_time).total_seconds()
+                logger.info(f"[Pipeline] Completed {filename} in {elapsed:.1f}s")
+                completed_files += 1
+                
             except Exception as e:
-                logger.error(f"Error processing file {filename}: {str(e)}")
+                elapsed = (datetime.utcnow() - file_start_time).total_seconds()
+                logger.error(f"[Pipeline] Failed {filename} after {elapsed:.1f}s: {str(e)}")
+                failed_files += 1
+                
                 # Update database with error
                 db = SessionLocal()
                 try:
@@ -59,9 +75,13 @@ async def process_ingestion_pipeline(
                     )
                 finally:
                     db.close()
+        
+        # Pipeline completion summary
+        total_elapsed = (datetime.utcnow() - pipeline_start_time).total_seconds()
+        logger.info(f"[Pipeline] Batch {batch_job_id} complete: {completed_files} succeeded, {failed_files} failed ({total_elapsed:.1f}s total)")
     
     except Exception as e:
-        logger.error(f"Fatal error in ingestion pipeline: {str(e)}")
+        logger.error(f"[Pipeline] Fatal error in batch {batch_job_id}: {str(e)}")
 
 
 async def _monitor_parsing_status(
@@ -98,22 +118,23 @@ async def _monitor_parsing_status(
                 status_response = await pdf_parser_service.check_parsing_status(batch_job_file_id)
                 parsing_status = status_response.get("status", "pending")
                 
-                logger.info(f"Parsing status for {filename}: {parsing_status}")
+                logger.debug(f"[Parsing] {filename}: {parsing_status} (attempt {attempt + 1}/{max_retries})")
                 
                 # Update database
                 db_file.parsing_status = parsing_status
                 db_file.updated_at = __import__('datetime').datetime.utcnow()
                 
                 if parsing_status == "completed":
-                    logger.info(f"Parsing completed for {filename}")
+                    output_path = status_response.get("output_path", "")
+                    logger.info(f"[Parsing] {filename}: completed - output: {output_path}")
                     db_file.status = IngestionStatus.PARSED
-                    db_file.parser_output_path = status_response.get("output_path")
+                    db_file.parser_output_path = output_path
                     db.commit()
                     return
                 
                 elif parsing_status == "failed":
                     error_msg = status_response.get("error", "Unknown error")
-                    logger.error(f"Parsing failed for {filename}: {error_msg}")
+                    logger.error(f"[Parsing] {filename}: failed - {error_msg}")
                     db_file.status = IngestionStatus.FAILED
                     db_file.error_message = error_msg
                     db.commit()
@@ -122,14 +143,16 @@ async def _monitor_parsing_status(
                 db.commit()
                 
             except Exception as e:
-                logger.error(f"Error checking parsing status: {str(e)}")
+                logger.error(f"[Parsing] {filename}: error checking status - {str(e)}")
                 if attempt < max_retries - 1:
                     await asyncio.sleep(retry_interval)
                 else:
+                    logger.error(f"[Parsing] {filename}: timeout after {max_retries * retry_interval}s")
                     raise
             
             # Wait before next check
-            await asyncio.sleep(retry_interval)
+            if attempt < max_retries - 1:
+                await asyncio.sleep(retry_interval)
         
         raise TimeoutError(f"Parsing timeout for {filename} after {max_retries * retry_interval} seconds")
     
@@ -167,9 +190,8 @@ async def _call_dataprep(
         db.commit()
         
         # Call DataPrep service
-        # Note: This assumes the parser output path follows a specific structure
-        # Adjust based on actual PDF parser output structure
         output_tree_path = f"{db_file.parser_output_path}/output/processing/output_tree.json"
+        logger.debug(f"[DataPrep] {filename}: calling DataPrep with path {output_tree_path}")
         
         result = await dataprep_service.ingest_document(
             filename=filename,
@@ -184,10 +206,10 @@ async def _call_dataprep(
         db_file.dataprep_status = "completed"
         db.commit()
         
-        logger.info(f"DataPrep ingestion completed for {filename}")
+        logger.info(f"[DataPrep] {filename}: ingestion completed")
     
     except Exception as e:
-        logger.error(f"Error in DataPrep: {str(e)}")
+        logger.error(f"[DataPrep] {filename}: {str(e)}")
         if db_file:
             db_file.status = IngestionStatus.FAILED
             db_file.dataprep_status = "failed"
