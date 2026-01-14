@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./rag_backend.db"
     
+    # Batch Processing Directory (PDF Parser output)
+    # In Docker: /data/batch_processing (mounted from host)
+    # On host: /home/ritik-intel/ali/pdf-parser/AIComps/comps/pdf-parser/batch_processing
+    BATCH_PROCESSING_DIR: str = "/data/batch_processing"
+    
     # PDF Parser Service
     PDF_PARSER_HOST: str = "localhost"
     PDF_PARSER_PORT: int = 8000

@@ -29,7 +29,7 @@ class DataPrepService:
         
         Args:
             filename: Original filename
-            output_tree_path: Path to output_tree.json from PDF parser
+            output_tree_path: Full path to output_tree.json from PDF parser
             user_id: User identifier
             batch_job_id: Batch job ID
             batch_job_file_id: Individual file ID
@@ -40,7 +40,7 @@ class DataPrepService:
         try:
             url = f"{self.base_url}/v1/dataprep/ingest"
             
-            # Prepare form data
+            # Prepare form data with output_tree_path for direct path usage
             form_data = [
                 ("filename", (None, filename)),
                 ("qdrant_host", (None, settings.QDRANT_HOST)),

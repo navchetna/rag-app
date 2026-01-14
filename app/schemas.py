@@ -22,6 +22,7 @@ class FileStatus(BaseModel):
     status: str
     parsing_status: str
     dataprep_status: str
+    in_qdrant: bool = False
     error_message: Optional[str] = None
     created_at: datetime
     updated_at: datetime
@@ -37,6 +38,61 @@ class JobStatusResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     error_message: Optional[str] = None
+
+
+# Batch Browsing Schemas
+class BatchFileInfo(BaseModel):
+    """Info about a file in a batch from filesystem"""
+    file_id: str
+    filename: str
+    parsing_status: str  # completed, in_progress, failed, pending
+    output_tree_path: Optional[str] = None
+
+
+class BatchInfo(BaseModel):
+    """Info about a batch from filesystem"""
+    batch_id: str
+    user: str
+    status: str
+    created_at: str
+    updated_at: str
+    file_count: int
+    files: List[BatchFileInfo]
+
+
+class BatchListResponse(BaseModel):
+    """Response for listing all batches"""
+    batches: List[BatchInfo]
+    total_batches: int
+
+
+class AddToQdrantRequest(BaseModel):
+    """Request to add selected files to Qdrant"""
+    files: List[dict]  # List of {batch_id, file_id, filename, output_tree_path}
+    user_id: str = "default"
+
+
+class AddToQdrantResponse(BaseModel):
+    """Response for add to Qdrant operation"""
+    message: str
+    total_files: int
+    successful: int
+    failed: int
+    results: List[dict]
+
+
+class QdrantFileInfo(BaseModel):
+    """Info about a file in Qdrant"""
+    batch_job_file_id: str
+    filename: str
+    batch_job_id: str
+    added_at: datetime
+
+
+class QdrantFilesResponse(BaseModel):
+    """Response for listing files in Qdrant"""
+    files: List[QdrantFileInfo]
+    total_files: int
 
 
 # Query Schemas

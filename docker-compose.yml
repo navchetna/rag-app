@@ -18,5 +18,8 @@ services:
       - RETRIEVER_PORT=7000
       - QDRANT_HOST=localhost
       - QDRANT_PORT=6333
+      - BATCH_PROCESSING_DIR=/data/batch_processing
+    volumes:
+      - /user-ali/pdf-parser/AIComps/comps/pdf-parser/batch_processing:/data/batch_processing:ro
     network_mode: host
     restart: unless-stopped

@@ -77,19 +77,37 @@ class LLMService:
     def _build_system_prompt(self, context: Optional[str] = None) -> str:
         """Build system prompt with or without context"""
         if context and context.strip():
-            return f"""You are a helpful assistant that answers questions based on provided context.
-If the context is relevant, use it to answer the question.
-Always be factual and cite the context when you use it.
+            return f"""You are a helpful assistant that answers questions based on provided context and your training knowledge.
 
-Context:
+CRITICAL INSTRUCTIONS:
+- You MUST explicitly indicate when you are answering from the provided context or from your general knowledge.
+- Wrap answers derived from the provided context in <context> tags.
+- Wrap answers derived from your training knowledge or memory in <memory> tags.
+- Always be clear about your source. Do not mix sources without explicit tags.
+- If you use information from both sources, clearly separate them with appropriate tags.
+
+Provided Context:
 {context}
 
-Answer the user's question based on the context above. If the context doesn't contain relevant information, 
-you can use your general knowledge but make it clear."""
+Example format:
+<context>Based on the provided context, [answer based on the context]</context>
+<memory>Additionally, from my knowledge, [answer based on training/memory]</memory>
+
+Now answer the user's question, making sure to clearly mark your sources with <context> and <memory> tags."""
         else:
-            return """You are a helpful assistant. 
-No specific context was provided for this question, so answer based on your knowledge.
-Be helpful and accurate."""
+            return """You are a helpful assistant that must clearly indicate the source of your answers.
+
+CRITICAL INSTRUCTIONS:
+- You MUST explicitly indicate when you are answering from your training knowledge (memory).
+- Wrap all answers in <memory> tags since no context document is provided.
+- Be helpful, accurate, and always mark your source.
+
+Since no specific context document was provided, all your answers should be wrapped in <memory> tags.
+
+Example format:
+<memory>[Your answer based on training knowledge and memory]</memory>
+
+Answer the user's questions, making sure to mark your source with <memory> tags."""
 
 
 # Global LLM service instance

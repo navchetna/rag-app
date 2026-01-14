@@ -43,6 +43,8 @@ class IngestionFile(Base):
     status = Column(Enum(IngestionStatus), default=IngestionStatus.QUEUED, index=True)
     parsing_status = Column(String(50), default="pending")  # pending, in_progress, completed, failed
     dataprep_status = Column(String(50), default="pending")
+    in_qdrant = Column(Boolean, default=False, index=True)  # True if successfully added to Qdrant
+    output_tree_path = Column(String(512), nullable=True)  # Path to output_tree.json
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     error_message = Column(Text, nullable=True)

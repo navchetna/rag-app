@@ -85,6 +85,7 @@ async def get_ingestion_status(
                 status=f.status.value,
                 parsing_status=f.parsing_status,
                 dataprep_status=f.dataprep_status,
+                in_qdrant=f.in_qdrant if hasattr(f, 'in_qdrant') else False,
                 error_message=f.error_message,
                 created_at=f.created_at,
                 updated_at=f.updated_at

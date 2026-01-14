@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import settings
 from app.database import init_db
-from app.routes import ingest, status, query
+from app.routes import ingest, status, query, batches
 from app.schemas import HealthResponse
 
 # Configure logging
@@ -56,6 +56,7 @@ app.add_middleware(
 app.include_router(ingest.router)
 app.include_router(status.router)
 app.include_router(query.router)
+app.include_router(batches.router)
 
 
 # Health check endpoint

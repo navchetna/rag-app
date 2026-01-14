@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rag-streamlit-fe:latest
+    container_name: rag-streamlit
+    network_mode: host
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - BACKEND_URL=http://localhost:8080
+    volumes:
+      - ./streamlit_app.py:/app/streamlit_app.py
+    restart: unless-stopped
+
+networks:
+  rag-network:
+    driver: bridge
+
