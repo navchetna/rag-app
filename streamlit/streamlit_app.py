@@ -135,7 +135,7 @@ st.markdown("""
         font-size: 18px;
         font-weight: 700;
         color: #2c3e50;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         text-align: center;
     }
     
@@ -143,7 +143,7 @@ st.markdown("""
     .input-container {
         display: flex;
         gap: 10px;
-        margin-top: 20px;
+        margin-top: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
