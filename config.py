@@ -18,7 +18,6 @@ class Settings(BaseSettings):
     
     # Batch Processing Directory (PDF Parser output)
     # In Docker: /data/batch_processing (mounted from host)
-    # On host: /home/ritik-intel/ali/pdf-parser/AIComps/comps/pdf-parser/batch_processing
     BATCH_PROCESSING_DIR: str = "/data/batch_processing"
     
     # PDF Parser Service
