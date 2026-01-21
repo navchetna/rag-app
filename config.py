@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     RETRIEVER_PORT: int = 7000
     RETRIEVER_TIMEOUT: int = 30
     
+    # Knowledge Graph Service
+    KNOWLEDGE_GRAPH_HOST: str = "localhost"
+    KNOWLEDGE_GRAPH_PORT: int = 6000
+    KNOWLEDGE_GRAPH_TIMEOUT: int = 30
+    
     # Qdrant Configuration
     QDRANT_HOST: str = "localhost"
     QDRANT_PORT: int = 6333
@@ -46,7 +51,7 @@ class Settings(BaseSettings):
     LLM_TIMEOUT: int = 30
     
     # Embedding Configuration
-    EMBEDDING_MODEL: str = "all-mpnet-base-v2"  # 768-dimensional embeddings
+    EMBEDDING_MODEL: str = "all-mpnet-base-v2" 
     
     class Config:
         env_file = ".env"
